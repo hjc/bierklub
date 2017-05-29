@@ -1,0 +1,4 @@
+*.pyc
+*.sw[op]
+.pyenv
+*.sqlite3
