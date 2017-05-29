@@ -30,8 +30,9 @@ class Event(models.Model):
         Returns:
             bool: True if event was created within the past day.
         """
+        now = timezone.now()
         recent = timezone.now() - datetime.timedelta(days=1)
-        return self.published_date >= recent
+        return recent <= self.published_date <= now
 
     def is_soon(self):
         """Has the event happened yet and, if not, will it happen in a week.
