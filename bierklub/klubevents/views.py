@@ -52,11 +52,13 @@ def attending_submit(request, event_id):
                                         args=(event.id, member.id)))
 
 
-def attending_success(request, event_id, member_id):
-    event = get_object_or_404(Event, pk=event_id)
-    member = get_object_or_404(Member, pk=member_id)
+class AttendingSuccessView(generic.DetailView):
+    model = Event
+    template_name = 'events/attending_success.html'
 
-    return render(request, 'events/attending_success.html', {
-        'event': event,
-        'member': member
-    })
+    def get_context_data(self, **kwargs):
+        context = super(AttendingSuccessView, self).get_context_data(**kwargs)
+        context['member'] = get_object_or_404(Member,
+                                              pk=self.kwargs['member_id'])
+
+        return context
