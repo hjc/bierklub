@@ -4,7 +4,10 @@ from django.urls import reverse
 from django.utils import timezone
 from django.test import TestCase
 
-from .models import Event
+from .models import Event, Member
+
+DEFAULT_MEMBER_NAME = 'Tom Hanks'
+DEFAULT_MEMBER_EMAIL = 'tom.hanks@example.com'
 
 
 class EventMethodTests(TestCase):
@@ -97,6 +100,21 @@ def create_event(days=None, number=1, **kwargs):
         dt = kwargs.pop('published_date', None)
 
     return Event.objects.create(number=number, published_date=dt, **kwargs)
+
+
+def create_member(name=DEFAULT_MEMBER_NAME, email=DEFAULT_MEMBER_EMAIL):
+    """Thin wrapper for creating and returning a Member.
+
+    Calling it as is creates our Tommy Hanks.
+
+    Kwargs:
+        name (str): The name for the Member.
+        email (str): The email for the member.
+
+    Returns:
+        klubevents.models.Member: The newly made Member.
+    """
+    return Member.objects.create(name=name, email=email)
 
 
 class EventViewTestCase(TestCase):
@@ -230,3 +248,133 @@ class EventDetailTests(TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'Past Test')
+
+
+class AttendingSubmitTests(TestCase):
+    def test_attending_submit_successful(self):
+        """A member should be able to mark themselves as attending an event.
+
+        If this member does not exist, then they should be made.
+        """
+        # create initial event
+        when = timezone.now() + datetime.timedelta(30)
+        event = create_event(days=-7, name='Member Test',
+                             description='Member Test', date=when,
+                             location='123 Fake Street')
+
+        # submit an attending notification
+        url = reverse('klubevents:attending_submit', args=(event.id,))
+        resp = self.client.post(url, {
+            'name': DEFAULT_MEMBER_NAME,
+            'email': DEFAULT_MEMBER_EMAIL,
+        })
+
+        # update model and check attendees
+        event.refresh_from_db()
+        attendees = event.attendees.all()
+        self.assertQuerysetEqual(
+            attendees,
+            ['<Member: {} <{}>>'.format(DEFAULT_MEMBER_NAME,
+                                        DEFAULT_MEMBER_EMAIL)]
+        )
+        member = Member.objects.get(pk=attendees[0].id)
+        self.assertEqual(member.name, DEFAULT_MEMBER_NAME)
+        self.assertEqual(member.email, DEFAULT_MEMBER_EMAIL)
+
+        # make sure redirect works
+        expected = reverse('klubevents:attending_success',
+                           args=(event.id, attendees[0].id))
+        self.assertEqual(resp.url, expected)
+
+        # check redirect content
+        resp = self.client.get(resp.url)
+
+        expected = 'Thanks for attending Member Test, {}'.format(
+            DEFAULT_MEMBER_NAME
+        )
+        self.assertContains(resp, expected)
+
+    def test_attending_submit_successful_existing_member(self):
+        """If a member already exists with the same email, marking them as
+        attending should not make a new member.
+        """
+        when = timezone.now() + datetime.timedelta(30)
+        event = create_event(days=-7, name='Member Test',
+                             description='Member Test', date=when,
+                             location='123 Fake Street')
+        member = create_member()
+
+        # submit an attending notification
+        url = reverse('klubevents:attending_submit', args=(event.id,))
+        resp = self.client.post(url, {
+            # name shouldn't matter
+            'name': 'JUNK',
+            'email': DEFAULT_MEMBER_EMAIL,
+        })
+
+        event.refresh_from_db()
+        attendees = event.attendees.all()
+
+        self.assertEqual(attendees[0].id, member.id)
+
+    def test_attending_submit_successful_non_exiting_member(self):
+        """If a member does not already exist in the system, they should be
+        added.
+        """
+        when = timezone.now() + datetime.timedelta(30)
+        event = create_event(days=-7, name='Member Test',
+                             description='Member Test', date=when,
+                             location='123 Fake Street')
+        member = create_member()
+
+        # submit an attending notification
+        url = reverse('klubevents:attending_submit', args=(event.id,))
+        resp = self.client.post(url, {
+            'name': 'Test User',
+            'email': 'test.user@example.com',
+        })
+
+        event.refresh_from_db()
+        attendees = event.attendees.all()
+
+        self.assertGreater(attendees[0].id, member.id)
+
+    def test_attending_submit_missing_name(self):
+        """If a user tries to submit as attending without a name, we should
+        error.
+        """
+        when = timezone.now() + datetime.timedelta(30)
+        event = create_event(days=-7, name='Member Test',
+                             description='Member Test', date=when,
+                             location='123 Fake Street')
+
+        url = reverse('klubevents:attending_submit', args=(event.id,))
+        resp = self.client.post(url, {
+            'name': 'Test User',
+        })
+
+        event.refresh_from_db()
+        self.assertFalse(event.attendees.all())
+
+        # the form should refill itself, so this should be on the page
+        self.assertContains(resp, 'Test User')
+
+    def test_attending_submit_missing_name(self):
+        """If a user tries to submit as attending without an email, we should
+        error.
+        """
+        when = timezone.now() + datetime.timedelta(30)
+        event = create_event(days=-7, name='Member Test',
+                             description='Member Test', date=when,
+                             location='123 Fake Street')
+
+        url = reverse('klubevents:attending_submit', args=(event.id,))
+        resp = self.client.post(url, {
+            'email': 'testuser@example.com',
+        })
+
+        event.refresh_from_db()
+        self.assertFalse(event.attendees.all())
+
+        # the form should refill itself, so this should be on the page
+        self.assertContains(resp, 'testuser@example.com')
