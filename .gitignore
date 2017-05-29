@@ -2,3 +2,5 @@
 *.sw[op]
 .pyenv
 *.sqlite3
+.coverage
+htmlcov
