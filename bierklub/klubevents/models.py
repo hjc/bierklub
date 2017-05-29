@@ -8,7 +8,7 @@ class Event(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=4096)
     date = models.DateTimeField()
-    number = models.IntegerField('number IRT total events')
+    number = models.IntegerField('event #')
     location = models.CharField('address of brewery', max_length=128)
     attendees = models.ManyToManyField('Member',
                                        db_table='klubevents_event_members')
@@ -43,6 +43,10 @@ class Event(models.Model):
         soon = timezone.now() + datetime.timedelta(days=7)
         now = timezone.now()
         return now < self.date <= soon
+
+    is_soon.admin_order_field = 'date'
+    is_soon.boolean = True
+    is_soon.short_description = 'Is Soon?'
 
 
 class Member(models.Model):
