@@ -1,30 +1,28 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.views import generic
 
 from .models import Event, Member
 
 
-def index(request):
-    latest = Event.objects.order_by('-published_date')[:5]
+class IndexView(generic.ListView):
+    template_name = 'events/index.html'
+    context_object_name = 'latest_event_list'
 
-    context = {
-        'latest_event_list': latest,
-    }
-
-    return render(request, 'events/index.html', context)
-
-
-def detail(request, event_id):
-    event = get_object_or_404(Event, pk=event_id)
-
-    return render(request, 'events/detail.html', {'event': event})
+    def get_queryset(self):
+        """Return the last 5 published events."""
+        return Event.objects.order_by('-published_date')[:5]
 
 
-def attending(request, event_id):
-    event = get_object_or_404(Event, pk=event_id)
+class DetailView(generic.DetailView):
+    model = Event
+    template_name = 'events/detail.html'
 
-    return render(request, 'events/attending.html', {'event': event})
+
+class AttendingView(generic.DetailView):
+    model = Event
+    template_name = 'events/attending.html'
 
 
 def attending_submit(request, event_id):
