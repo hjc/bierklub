@@ -10,9 +10,16 @@ class Event(models.Model):
     attendees = models.ManyToManyField('Member',
                                        db_table='klubevents_event_members')
 
+    def __str__(self):
+        return (self.name + ' at ' + self.location + ' on '
+                + self.date.strftime('%Y-%m-%d'))
+
 
 class Member(models.Model):
     name = models.CharField('full name', max_length=128)
     email = models.EmailField()
     join_date = models.DateField()
+
+    def __str__(self):
+        return self.name + ' <' + self.email + '>'
 
