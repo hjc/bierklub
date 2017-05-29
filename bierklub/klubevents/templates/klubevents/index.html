@@ -1,0 +1,16 @@
+{% extends 'klubevents/base.html' %}
+
+{% block content %}
+  {% if latest_event_list %}
+    <h2>Event List</h1>
+    <hr>
+    
+    <ul>
+    {% for event in latest_event_list %}
+      <li><a href="{% url 'klubevents:detail' event.id %}">{{ event.name }}</a></li>
+    {% endfor %}
+    </ul>
+  {% else %}
+    <p>No events are available.</p>
+  {% endif %}
+{% endblock %}

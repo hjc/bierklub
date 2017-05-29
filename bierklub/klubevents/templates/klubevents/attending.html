@@ -1,0 +1,26 @@
+{% extends 'klubevents/base.html' %}
+
+{% block content %}
+  <h1>{{ event.name }}</h1>
+
+  {% if error_message %}
+    <p><strong>{{ error_message }}</strong></p>
+  {% endif %}
+
+  <form action="{% url 'klubevents:attending_submit' event.id %}" method="post">
+    {% csrf_token %}
+    <label for="name">Your name:</label>
+    <input id="name" type="text" name="name" value="{{ name }}">
+
+    <br>
+    <br>
+
+    <label for="email">Your email:</label>
+    <input id="email" type="email" name="email" value="{{ email }}">
+
+    <br>
+    <br>
+    
+    <input type="submit" value="Submit">
+  </form>
+{% endblock %}

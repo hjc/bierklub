@@ -8,7 +8,7 @@ from .models import Event, Member
 
 
 class IndexView(generic.ListView):
-    template_name = 'events/index.html'
+    template_name = 'klubevents/index.html'
     context_object_name = 'latest_event_list'
 
     def get_queryset(self):
@@ -20,7 +20,7 @@ class IndexView(generic.ListView):
 
 class DetailView(generic.DetailView):
     model = Event
-    template_name = 'events/detail.html'
+    template_name = 'klubevents/detail.html'
 
     def get_queryset(self):
         """Excludes any events that have a publish date in the future.
@@ -30,7 +30,7 @@ class DetailView(generic.DetailView):
 
 class AttendingView(generic.DetailView):
     model = Event
-    template_name = 'events/attending.html'
+    template_name = 'klubevents/attending.html'
 
 
 def attending_submit(request, event_id):
@@ -40,7 +40,7 @@ def attending_submit(request, event_id):
     name = request.POST.get('name')
 
     if not name or not email:
-        return render(request, 'events/attending.html', {
+        return render(request, 'klubevents/attending.html', {
             'event': event,
             'error_message': 'You must fill out all fields.',
             'name': name,
@@ -62,7 +62,7 @@ def attending_submit(request, event_id):
 
 class AttendingSuccessView(generic.DetailView):
     model = Event
-    template_name = 'events/attending_success.html'
+    template_name = 'klubevents/attending_success.html'
 
     def get_context_data(self, **kwargs):
         context = super(AttendingSuccessView, self).get_context_data(**kwargs)

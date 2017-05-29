@@ -1,0 +1,14 @@
+{% load static %}
+<html>
+  <head>
+    <title>Bier Klub | {{ title|default:"Home" }}</title>
+    <link rel="stylesheet" type="text/css"
+                           href="{% static 'klubevents/milligram.min.css' %}" />
+  </head>
+  <body>
+    <div class="content container">
+      {% block content %}
+      {% endblock %}
+    </div>
+  </body>
+</html>
