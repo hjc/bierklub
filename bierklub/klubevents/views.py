@@ -22,6 +22,11 @@ class DetailView(generic.DetailView):
     model = Event
     template_name = 'events/detail.html'
 
+    def get_queryset(self):
+        """Excludes any events that have a publish date in the future.
+        """
+        return Event.objects.filter(published_date__lte=timezone.now())
+
 
 class AttendingView(generic.DetailView):
     model = Event

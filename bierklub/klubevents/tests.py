@@ -203,3 +203,30 @@ class EventViewTestCase(TestCase):
 
         resp = self.client.get(reverse('klubevents:index'))
         self.assertQuerysetEqual(resp.context['latest_event_list'], expected)
+
+
+class EventDetailTests(TestCase):
+    def test_detail_with_future_event(self):
+        """The detail view of an Event with a future published date should 404.
+        """
+        when = timezone.now() + datetime.timedelta(30)
+        future_event = create_event(days=7, name='Future Test',
+                                    description='Future Test', date=when,
+                                    location='123 Fake Street')
+        url = reverse('klubevents:detail', args=(future_event.id,))
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 404)
+
+    def test_detail_with_past_event(self):
+        """The detail view of an Event with a past published date should render.
+        """
+        when = timezone.now() + datetime.timedelta(7)
+        past_event = create_event(days=-5, name='Past Test',
+                                    description='Past Test', date=when,
+                                    location='123 Fake Street')
+        url = reverse('klubevents:detail', args=(past_event.id,))
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'Past Test')
