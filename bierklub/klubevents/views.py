@@ -1,6 +1,7 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views import generic
 
 from .models import Event, Member
@@ -12,7 +13,9 @@ class IndexView(generic.ListView):
 
     def get_queryset(self):
         """Return the last 5 published events."""
-        return Event.objects.order_by('-published_date')[:5]
+        return (Event.objects
+                .filter(published_date__lte=timezone.now())
+                .order_by('-published_date')[:5])
 
 
 class DetailView(generic.DetailView):
