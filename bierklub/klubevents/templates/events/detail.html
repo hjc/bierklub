@@ -1,0 +1,34 @@
+<h1>
+  Bier Klub Round {{ event.number }}: 
+  {{ event.name }} ({{ event.date|date:"Y-m-d" }})
+</h1>
+
+<p>{{ event.preamble }}</p>
+
+<h2>brew cask install hjc/bierklub/{{ event.number }}</h2>
+
+<p>{{ event.description }}</p>
+
+<h2>The Guest List</h1>
+
+{% if event.attendees.all %}
+  <ul>
+  {% for attendee in event.attendees.all %}
+    <li>{{ attendee.name }}</li>
+  {% endfor %}
+  </ul>
+  <p>
+    Not on the list? Go ahead and sign up
+    <a href="{% url 'klubevents:attending' event.id %}">here</a>.
+  </p>
+{% else %}
+  <p>No attendees signed up yet, <a href="{% url 'klubevents:attending' event.id %}">be
+    the first to sign up!</a>
+  </p>
+{% endif %}
+
+{% if event.additional_notes %}
+<h2>Additional Notes</h2>
+
+<p>{{ event.additional_notes }}</p>
+{% endif %}
