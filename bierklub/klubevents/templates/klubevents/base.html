@@ -3,9 +3,19 @@
   <head>
     <title>Bier Klub | {{ title|default:"Home" }}</title>
     <link rel="stylesheet" type="text/css"
-                           href="{% static 'klubevents/milligram.min.css' %}" />
+                           href="{% static 'klubevents/css/font-awesome.min.css' %}" />
+    <link rel="stylesheet" type="text/css"
+                           href="{% static 'klubevents/css/milligram.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'klubevents/css/style.css' %}" type="text/css">
   </head>
   <body>
+    <nav class="navigation">
+      <div class="container">
+        <i class="fa fa-beer" aria-hidden="true"></i>
+        <a class="nav-title" href="{% url 'klubevents:index' %}">Bier Klub</a>
+      </div>
+    </nav>
+    <div class="clearfix"></div>
     <div class="content container">
       {% block content %}
       {% endblock %}

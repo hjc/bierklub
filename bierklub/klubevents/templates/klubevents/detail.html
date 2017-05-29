@@ -1,18 +1,18 @@
 {% extends 'klubevents/base.html' %}
 
 {% block content %}
-  <h1>
+  <h2>
     Bier Klub Round {{ event.number }}: 
     {{ event.name }} ({{ event.date|date:"Y-m-d" }})
-  </h1>
+  </h2>
 
   <p>{{ event.preamble }}</p>
 
-  <h2>brew cask install hjc/bierklub/{{ event.number }}</h2>
+  <h3>brew cask install hjc/bierklub/{{ event.number }}</h3>
 
   <p>{{ event.description }}</p>
 
-  <h2>The Guest List</h1>
+  <h3>The Guest List</h3>
 
   {% if event.attendees.all %}
     <ul>
@@ -31,7 +31,7 @@
   {% endif %}
 
   {% if event.additional_notes %}
-    <h2>Additional Notes</h2>
+    <h3>Additional Notes</h3>
 
     <p>{{ event.additional_notes }}</p>
   {% endif %}

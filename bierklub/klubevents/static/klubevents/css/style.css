@@ -1,0 +1,28 @@
+.navigation {
+  background-color: #f4f5f6;
+  display: block;
+  border-bottom: .1rem solid #d1d1d1;
+  height: 5.2rem;
+  left: 0;
+  right: 0;
+  top: 0;
+  max-width: 100%;
+  width: 100%;
+  z-index: 1;
+  position: fixed;
+}
+
+.navigation .nav-title {
+  color: #606c76;
+  position: relative;
+  display: inline;
+  line-height: 5.2rem;
+  font-size: 1.6rem;
+  padding: 0;
+  text-decoration: None;
+}
+
+.content.container {
+  padding-top: 7.5rem;
+  padding-bottom: 7.5rem;
+}
