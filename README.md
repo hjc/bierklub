@@ -1,5 +1,10 @@
 # Bier Klub
 
+Bier Klub is the public-facing event and invitation system for HJC's NYC Beer
+Club.
+
+To be hosted soon!
+
 ## Getting Started
 
 Bier Klub is dockerized, so getting started is easy. First, add this line to
