@@ -20,3 +20,8 @@ urlpatterns = [
     url(r'^events/', include('klubevents.urls')),
     url(r'^admin/', admin.site.urls),
 ]
+
+# if you want Django to serve static files for you through nginx, you can use
+# this
+# from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+# urlpatterns += staticfiles_urlpatterns()

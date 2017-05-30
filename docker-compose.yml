@@ -1,0 +1,27 @@
+version: '2'
+
+services:
+  web:
+    image: 'hjc/bierklub:latest'
+    build: .
+    volumes:
+      - ".:/opt/bierklub"
+    expose:
+      - "8000"
+    entrypoint:
+      - 'env'
+      - 'DJANGO_SETTINGS_MODULE=bierklub.settings'
+      - 'gunicorn'
+      - '-w'
+      - '2'
+      - 'bierklub.wsgi:application'
+      - '-b'
+      - '0.0.0.0:8000'
+      - '--reload'
+  nginx:
+    image: 'nginx:latest'
+    volumes:
+      - "./conf/nginx.hosts:/etc/nginx/conf.d/default.conf"
+      - ".:/opt/bierklub"
+    ports:
+      - '80:80'
