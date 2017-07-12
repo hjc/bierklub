@@ -30,6 +30,7 @@ ALLOWED_HOSTS = ['localhost', 'bierklub.dev']
 
 INSTALLED_APPS = [
     'klubevents.apps.KlubeventsConfig',
+    'error_handlers.apps.ErrorHandlersConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

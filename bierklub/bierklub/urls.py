@@ -16,10 +16,16 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+import klubevents.views
+
 urlpatterns = [
+    url(r'^$', klubevents.views.IndexView.as_view()),
     url(r'^events/', include('klubevents.urls')),
     url(r'^admin/', admin.site.urls),
 ]
+
+handler404 = 'error_handlers.views.standard_404'
+handler500 = 'error_handlers.views.standard_500'
 
 # if you want Django to serve static files for you through nginx, you can use
 # this
