@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views import generic
 
-from .models import Event, Member
+from ..models import Event, Member
 
 
 class IndexView(generic.ListView):
