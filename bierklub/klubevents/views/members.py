@@ -32,7 +32,12 @@ class RegisterView(View):
 
         if form.is_valid():
             # make the user, the member, and tie them together
-            first, last = request.POST['full_name'].split(' ')
+            full_name = request.POST['full_name']
+            if ' ' in full_name:
+                first, last = full_name.split(' ')
+            else:
+                first, last = full_name, ''
+
             email = request.POST['email']
 
             user = User.objects.create_user(
