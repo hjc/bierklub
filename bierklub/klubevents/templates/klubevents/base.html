@@ -18,6 +18,12 @@
                 Cheers {{ user.username }}
             </span>
             <span class="clearfix"></span>
+        {% else %}
+            <span class="float-right nav-title">
+                <a href="">Login</a> |
+                <a href="{% url 'klubevents:member_registration' %}">Register</a>
+            </span>
+            <span class="clearfix"></span>
         {% endif %}
       </div>
     </nav>
