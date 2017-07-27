@@ -1,5 +1,6 @@
 import datetime
 
+from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils import timezone
 from django.test import TestCase
@@ -8,6 +9,7 @@ from .models import Event, Member
 
 DEFAULT_MEMBER_NAME = 'Tom Hanks'
 DEFAULT_MEMBER_EMAIL = 'tom.hanks@example.com'
+DEFAULT_MEMBER_PASSWORD = 'password'
 
 
 class EventMethodTests(TestCase):
@@ -102,7 +104,8 @@ def create_event(days=None, number=1, **kwargs):
     return Event.objects.create(number=number, published_date=dt, **kwargs)
 
 
-def create_member(name=DEFAULT_MEMBER_NAME, email=DEFAULT_MEMBER_EMAIL):
+def create_member(name=DEFAULT_MEMBER_NAME, email=DEFAULT_MEMBER_EMAIL,
+                  password=DEFAULT_MEMBER_PASSWORD):
     """Thin wrapper for creating and returning a Member.
 
     Calling it as is creates our Tommy Hanks.
@@ -114,7 +117,12 @@ def create_member(name=DEFAULT_MEMBER_NAME, email=DEFAULT_MEMBER_EMAIL):
     Returns:
         klubevents.models.Member: The newly made Member.
     """
-    return Member.objects.create(name=name, email=email)
+    first, last = name.split(' ')
+    user = User.objects.create_user(email, email, password, first_name=first,
+                                    last_name=last)
+    member = Member(email=email, name=name, user=user)
+    member.save()
+    return member
 
 
 class EventViewTestCase(TestCase):
@@ -378,3 +386,37 @@ class AttendingSubmitTests(TestCase):
 
         # the form should refill itself, so this should be on the page
         self.assertContains(resp, 'testuser@example.com')
+
+
+class MemberRegistrationTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super(MemberRegistrationTests, cls).setUpClass()
+        cls.url = reverse('klubevents:member_registration')
+
+    def test_render_registration_form(self):
+        """Ensure the registration form renders."""
+        resp = self.client.get(self.url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(b"Sign Up and Drink With Us!", resp.content)
+
+        labels = [
+            b'Email',
+            b'Your name',
+            b'Password',
+            b'Confirm password',
+        ]
+
+        for label in labels:
+            self.assertIn(label, resp.content)
+
+        inputs = [
+            b'name="email"',
+            b'name="full_name"',
+            b'name="password"',
+            b'name="confirm_password"',
+        ]
+
+        for input_ in inputs:
+            self.assertIn(input_, resp.content)
