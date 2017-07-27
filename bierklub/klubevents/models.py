@@ -53,6 +53,7 @@ class Member(models.Model):
     name = models.CharField('full name', max_length=128)
     email = models.EmailField()
     join_date = models.DateField(default=timezone.now)
+    user = models.ForeignKey('auth.User', on_delete=models.PROTECT)
 
     def __str__(self):
         return self.name + ' <' + self.email + '>'

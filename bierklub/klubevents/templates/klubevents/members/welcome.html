@@ -1,0 +1,17 @@
+{% extends 'klubevents/base.html' %}
+
+{% block content %}
+    <div class="row">
+        <div class="content">
+            <p>
+                Welcome to the site {{ member.name }}!
+            </p>
+
+            <p>
+                Please check out the
+                <a href="{% url 'klubevents:index' %}">event list</a>
+                for information our next drink-up!
+            </p>
+        </div>
+    </div>
+{% endblock %}
