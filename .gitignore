@@ -5,3 +5,4 @@
 .coverage
 htmlcov
 .python-version
+static/*
