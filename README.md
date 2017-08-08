@@ -21,3 +21,12 @@ collectstatic`.
 
 After that's done, just run `docker-compose up` and then visit `bierklub.dev`.
 You should be good to go!
+
+## Topics to Learn
+
+* Creating your own models.
+* Model managers.
+* Custom querysets.
+* Template extensions and the templating engine.
+* Django Rest Framework
+* More to come!
