@@ -13,6 +13,18 @@
       <div class="container">
         <i class="fa fa-beer" aria-hidden="true"></i>
         <a class="nav-title" href="{% url 'klubevents:index' %}">Bier Klub</a>
+        {% if not user.is_anonymous %}
+            <span class="float-right nav-title">
+                Cheers {{ user.username }}
+            </span>
+            <span class="clearfix"></span>
+        {% else %}
+            <span class="float-right nav-title">
+                <a href="">Login</a> |
+                <a href="{% url 'klubevents:member_registration' %}">Register</a>
+            </span>
+            <span class="clearfix"></span>
+        {% endif %}
       </div>
     </nav>
     <div class="clearfix"></div>

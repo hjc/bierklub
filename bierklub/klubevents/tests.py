@@ -1,5 +1,6 @@
 import datetime
 
+from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils import timezone
 from django.test import TestCase
@@ -8,6 +9,7 @@ from .models import Event, Member
 
 DEFAULT_MEMBER_NAME = 'Tom Hanks'
 DEFAULT_MEMBER_EMAIL = 'tom.hanks@example.com'
+DEFAULT_MEMBER_PASSWORD = 'password'
 
 
 class EventMethodTests(TestCase):
@@ -102,7 +104,8 @@ def create_event(days=None, number=1, **kwargs):
     return Event.objects.create(number=number, published_date=dt, **kwargs)
 
 
-def create_member(name=DEFAULT_MEMBER_NAME, email=DEFAULT_MEMBER_EMAIL):
+def create_member(name=DEFAULT_MEMBER_NAME, email=DEFAULT_MEMBER_EMAIL,
+                  password=DEFAULT_MEMBER_PASSWORD):
     """Thin wrapper for creating and returning a Member.
 
     Calling it as is creates our Tommy Hanks.
@@ -114,7 +117,12 @@ def create_member(name=DEFAULT_MEMBER_NAME, email=DEFAULT_MEMBER_EMAIL):
     Returns:
         klubevents.models.Member: The newly made Member.
     """
-    return Member.objects.create(name=name, email=email)
+    first, last = name.split(' ')
+    user = User.objects.create_user(email, email, password, first_name=first,
+                                    last_name=last)
+    member = Member(email=email, name=name, user=user)
+    member.save()
+    return member
 
 
 class EventViewTestCase(TestCase):
@@ -378,3 +386,131 @@ class AttendingSubmitTests(TestCase):
 
         # the form should refill itself, so this should be on the page
         self.assertContains(resp, 'testuser@example.com')
+
+
+class MemberRegistrationTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super(MemberRegistrationTests, cls).setUpClass()
+        cls.url = reverse('klubevents:member_registration')
+
+    def test_render_registration_form(self):
+        """Ensure the registration form renders."""
+        resp = self.client.get(self.url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(b"Sign Up and Drink With Us!", resp.content)
+
+        labels = [
+            b'Email',
+            b'Your name',
+            b'Password',
+            b'Confirm password',
+        ]
+
+        for label in labels:
+            self.assertIn(label, resp.content)
+
+        inputs = [
+            b'name="email"',
+            b'name="full_name"',
+            b'name="password"',
+            b'name="confirm_password"',
+        ]
+
+        for input_ in inputs:
+            self.assertIn(input_, resp.content)
+
+    def test_create_member(self):
+        """Ensure we can easily create a member and a user from it.
+        """
+        resp = self.client.post(self.url, {
+            'full_name': DEFAULT_MEMBER_NAME,
+            'email': DEFAULT_MEMBER_EMAIL,
+            'password': DEFAULT_MEMBER_PASSWORD,
+            'confirm_password': DEFAULT_MEMBER_PASSWORD,
+        })
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('Welcome to the site {}!'.format(DEFAULT_MEMBER_NAME),
+                      resp.content.decode('utf-8'))
+
+        member = Member.objects.get(email=DEFAULT_MEMBER_EMAIL)
+        self.assertTrue(member)
+        self.assertEqual(member.name, DEFAULT_MEMBER_NAME)
+
+        user = member.user
+        first, last = DEFAULT_MEMBER_NAME.split(' ')
+        self.assertTrue(user)
+        self.assertEqual(user.email, DEFAULT_MEMBER_EMAIL)
+        self.assertEqual(user.first_name, first)
+        self.assertEqual(user.last_name, last)
+        self.assertTrue(user.check_password(DEFAULT_MEMBER_PASSWORD))
+        # make sure the user is logged in
+        self.assertEqual(int(self.client.session['_auth_user_id']), user.pk)
+
+    def test_create_duplicate_member(self):
+        """Ensure users with the same email can't be made."""
+        member = create_member()
+
+        resp = self.client.post(self.url, {
+            'full_name': DEFAULT_MEMBER_NAME,
+            'email': DEFAULT_MEMBER_EMAIL,
+            'password': DEFAULT_MEMBER_PASSWORD,
+            'confirm_password': DEFAULT_MEMBER_PASSWORD,
+        })
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(b'A user with this email already exists!', resp.content)
+
+    def test_create_password_mismatch(self):
+        """Ensure that passwords must match."""
+        resp = self.client.post(self.url, {
+            'full_name': DEFAULT_MEMBER_NAME,
+            'email': DEFAULT_MEMBER_EMAIL,
+            'password': DEFAULT_MEMBER_PASSWORD,
+            'confirm_password': 'foo'
+        })
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(b'Your passwords do not match!', resp.content)
+
+    def test_create_member_no_last(self):
+        """Ensure a user can be made with only a first name."""
+        resp = self.client.post(self.url, {
+            'full_name': 'firstonly',
+            'email': DEFAULT_MEMBER_EMAIL,
+            'password': DEFAULT_MEMBER_PASSWORD,
+            'confirm_password': DEFAULT_MEMBER_PASSWORD,
+        })
+
+        self.assertEqual(resp.status_code, 200)
+
+        member = Member.objects.get(email=DEFAULT_MEMBER_EMAIL)
+        self.assertTrue(member)
+
+        user = member.user
+        self.assertTrue(user)
+        self.assertEqual(user.email, DEFAULT_MEMBER_EMAIL)
+        self.assertTrue(user.check_password(DEFAULT_MEMBER_PASSWORD))
+
+    def test_required_fields(self):
+        """Ensure that all fields are required."""
+        fields_to_omit = ['full_name', 'email', 'password', 'confirm_password']
+
+        for field in fields_to_omit:
+            payload = {
+                'full_name': DEFAULT_MEMBER_NAME,
+                'email': DEFAULT_MEMBER_EMAIL,
+                'password': DEFAULT_MEMBER_PASSWORD,
+                'confirm_password': DEFAULT_MEMBER_PASSWORD,
+            }
+
+            del payload[field]
+
+            resp = self.client.post(self.url, payload)
+
+            self.assertEqual(resp.status_code, 200)
+
+            self.assertIn(b'This field is required', resp.content)
+            self.assertNotIn(b'Welcome to the site', resp.content)

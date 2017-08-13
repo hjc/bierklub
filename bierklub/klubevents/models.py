@@ -1,6 +1,7 @@
 import datetime
 
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 
 
@@ -20,6 +21,9 @@ class Event(models.Model):
     def __str__(self):
         return (self.name + ' at ' + self.location + ' on '
                 + self.date.strftime('%Y-%m-%d'))
+
+    def get_absolute_url(self):
+        return reverse('klubevents:detail', args=[self.id])
 
     def was_published_recently(self):
         """Was this event invite published on the site recently.
@@ -53,6 +57,8 @@ class Member(models.Model):
     name = models.CharField('full name', max_length=128)
     email = models.EmailField()
     join_date = models.DateField(default=timezone.now)
+    user = models.ForeignKey('auth.User', on_delete=models.PROTECT, null=True,
+                             blank=True)
 
     def __str__(self):
         return self.name + ' <' + self.email + '>'

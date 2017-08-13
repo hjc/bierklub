@@ -4,4 +4,5 @@
 *.sqlite3
 .coverage
 htmlcov
-static/
+.python-version
+static/*
