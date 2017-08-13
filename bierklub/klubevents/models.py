@@ -15,7 +15,7 @@ class Event(models.Model):
                                        db_table='klubevents_event_members')
     published_date = models.DateTimeField('date event was created',
                                           default=timezone.now)
-    preamble = models.CharField(max_length=512, default='')
+    preamble = models.CharField(max_length=1024, default='')
     additional_notes = models.CharField(max_length=1024, default='')
 
     def __str__(self):
