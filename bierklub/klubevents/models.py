@@ -14,8 +14,8 @@ class Event(models.Model):
                                        db_table='klubevents_event_members')
     published_date = models.DateTimeField('date event was created',
                                           default=timezone.now)
-    preamble = models.CharField(max_length=512, default='')
-    additional_notes = models.CharField(max_length=1024, default='')
+    preamble = models.CharField(max_length=1024, default='')
+    additional_notes = models.CharField(max_length=2048, default='')
 
     def __str__(self):
         return (self.name + ' at ' + self.location + ' on '

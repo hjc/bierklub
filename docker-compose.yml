@@ -23,5 +23,6 @@ services:
     volumes:
       - "./conf/nginx.hosts:/etc/nginx/conf.d/default.conf"
       - ".:/opt/bierklub"
+      - "./static:/var/www/static"
     ports:
       - '80:80'

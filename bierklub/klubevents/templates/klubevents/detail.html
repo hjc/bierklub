@@ -1,18 +1,21 @@
 {% extends 'klubevents/base.html' %}
+{% load markdown_deux_tags %}
 
 {% block content %}
-  <h2>
-    Bier Klub Round {{ event.number }}: 
-    {{ event.name }} ({{ event.date|date:"Y-m-d" }})
-  </h2>
+  <h3>
+    {% markdown %}
+Bier Klub Round {{ event.number }}: 
+{{ event.name }} ({{ event.date|date:"Y-m-d" }})
+    {% endmarkdown %}
+  </h3>
 
-  <p>{{ event.preamble }}</p>
+  {{ event.preamble|markdown }}
 
-  <h3>brew cask install hjc/bierklub/{{ event.number }}</h3>
+  <h4>brew cask install hjc/bierklub/{{ event.number }}</h4>
 
-  <p>{{ event.description }}</p>
+  {{ event.description|markdown }}
 
-  <h3>The Guest List</h3>
+  <h4>The Guest List</h4>
 
   {% if event.attendees.all %}
     <ul>
@@ -33,6 +36,6 @@
   {% if event.additional_notes %}
     <h3>Additional Notes</h3>
 
-    <p>{{ event.additional_notes }}</p>
+    {{ event.additional_notes|markdown }}
   {% endif %}
 {% endblock %}
